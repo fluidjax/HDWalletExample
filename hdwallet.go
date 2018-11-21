@@ -8,8 +8,17 @@ import (
    "github.com/btcsuite/btcutil"
    "github.com/btcsuite/btcd/chaincfg"
    "github.com/btcsuite/btcd/btcec"
-//   . "github.com/FactomProject/go-bip44"
 )
+
+/* 
+   Some Useful tools
+   Mnemonic Code Converter tool
+   https://www.coinomi.com/recovery-phrase-tool.html
+
+   Key Convertor
+   https://www.bitaddress.org
+   */
+
 
 func main(){
   //mnemonic
