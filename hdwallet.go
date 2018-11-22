@@ -42,32 +42,12 @@ func masterKeyFromSeed(seed []byte) *bip32.Key {
 
 //Bip44AddressFromXPub Generate Bitcoin address from XPub
 func Bip44AddressFromXPub(key *bip32.Key, addressIndex int) string {
-	xpubRaw := "xpub6FPsFsTPcNZW16Cz274HPALS91r8joGLFhQo7M93TPBRUBttb48xBZ9k34oiG29Bvqfry9QyXPsGXSRE1kjut92Dgik1w6Whm1GU4F122n8"
-	offset := 0
-
+	xpubRaw := key.PublicKey().String()
 	xpubKey, _ := hdkeychain.NewKeyFromString(xpubRaw)
-	keys := make([]*hdkeychain.ExtendedKey, 10)
-	for i := uint32(0); i < uint32(len(keys)); i++ {
-		chPubKey, _ := xpubKey.Child(i + uint32(offset))
-		fmt.Println(chPubKey.Address(&chaincfg.MainNetParams))
-	}
-
-	// return keys
-	//
-	// fmt.Println("XPUB: ", xpubRaw)
-	//
-	// devKey, _ := key.NewChildKey(uint32(addressIndex))
-	// fmt.Println("PUBLIC0:", devKey.PublicKey())
-	// fmt.Println("PUBLIC1:", devKey.String())
-	// fmt.Println("PUBLIC2:", hex.EncodeToString(devKey.ChainCode))
-	// fmt.Println("PUBLIC3:", hex.EncodeToString(devKey.FingerPrint))
-	// fmt.Println("PUBLIC4:", hex.EncodeToString(devKey.Key))
-	// //privKey, public := btcec.PrivKeyFromBytes(btcec.S256(), a.Key)
-	// //Use(privKey)
-	//
-	// //fmt.Println("PRIVATE:", privKey)
-	//caddr, _ := btcutil.NewAddressPubKey(public.SerializeCompressed(), &chaincfg.MainNetParams)
-	return "hello"
+	chPubKey, _ := xpubKey.Child(uint32(addressIndex))
+	//return chPubKey.Address(&chaincfg.MainNetParams)
+	address, _ := chPubKey.Address(&chaincfg.MainNetParams)
+	return address.String()
 }
 
 //Bip32Extended get Bip32 extended Keys for path
