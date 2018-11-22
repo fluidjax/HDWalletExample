@@ -29,7 +29,6 @@ import (
 //Bip44Address get Bitcoin (BIP32,39,44) address & associated private key for given seed, account & index
 func Bip44Address(seed []byte, coin int, account int, change int, addressIndex int) (string, *btcec.PrivateKey) {
 	bip32extended := Bip32Extended(seed, coin, account, change)
-	//fmt.Println("bip32extended: ", bip32extended.PublicKey())
 	add1, _ := bip32extended.NewChildKey(uint32(addressIndex))
 	privKey, public := btcec.PrivKeyFromBytes(btcec.S256(), add1.Key)
 	Use(privKey)
@@ -37,7 +36,8 @@ func Bip44Address(seed []byte, coin int, account int, change int, addressIndex i
 	return caddr.EncodeAddress(), privKey
 }
 
-func masterKeyFromSeed(seed []byte) *bip32.Key {
+//masterKeyFromSeed Generate Bitcoin address from XPub
+func MasterKeyFromSeed(seed []byte) *bip32.Key {
 	masterKey, _ := bip32.NewMasterKey(seed)
 	return masterKey
 }
@@ -54,7 +54,7 @@ func Bip44AddressFromXPub(key *bip32.Key, addressIndex int) string {
 
 //Bip32Extended get Bip32 extended Keys for path
 func Bip32Extended(seed []byte, coin int, account int, change int) *bip32.Key {
-	masterKey := masterKeyFromSeed(seed)
+	masterKey := MasterKeyFromSeed(seed)
 	child1, _ := masterKey.NewChildKey(0x8000002C)                //purpose 44
 	child2, _ := child1.NewChildKey(0x80000000 + uint32(coin))    //cointype 0 = bitcoin
 	child3, _ := child2.NewChildKey(0x80000000 + uint32(account)) //account 0
@@ -94,7 +94,7 @@ func main() {
 	mnemonic := Entropy2Mnemonic(startingEntropy)         //BIP39 Mnemonic
 	seed := Mnemonic2Seed(mnemonic)                       //BIP39 Seed
 	address, privateKey := Bip44Address(seed, 0, 0, 0, 0) //m/44'/0'/0'/0/0
-	xPrivBIP39 := masterKeyFromSeed(seed)                 //BIP32 Root Key
+	xPrivBIP39 := MasterKeyFromSeed(seed)                 //BIP32 Root Key
 	keyPairBIP32 := Bip32Extended(seed, 0, 0, 0)          // Generate BIP32 Extended Keypair (xPub/xPriv)
 	exPrivateKeyBIP32 := keyPairBIP32.String()            //BIP32 Extended Private Key
 	exPublicKeyBIP32 := keyPairBIP32.PublicKey().String() //BIP32 Extended Public Key
