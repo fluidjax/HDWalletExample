@@ -1,3 +1,7 @@
+//  (c)Christopher Morris 2018
+//  cmorris@qredo.com
+//  Qredo Limited
+
 package main
 
 import (
