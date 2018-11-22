@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/FactomProject/go-bip32"
 	"github.com/FactomProject/go-bip39"
 	"github.com/btcsuite/btcd/btcec"
@@ -24,7 +22,7 @@ import (
    https://www.bitaddress.org
 */
 
-//GetBitcoinAddress get Bitcoin (BIP32,39,44) address & associated private key for given seed, account & index
+//Bip44Address get Bitcoin (BIP32,39,44) address & associated private key for given seed, account & index
 func Bip44Address(seed []byte, coin int, account int, change int, addressIndex int) (string, *btcec.PrivateKey) {
 	bip32extended := Bip32Extended(seed, coin, account, change)
 	//fmt.Println("bip32extended: ", bip32extended.PublicKey())
@@ -73,30 +71,34 @@ func Mnemonic2Seed(mnemonic string) []byte {
 	return seed
 }
 
-//RandomSeed generate a randomseed
-func RandomSeed() []byte {
+//Random256Bits generate a randomseed
+func Random256Bits() []byte {
 	entropy, _ := bip39.NewEntropy(256)
 	return entropy
 }
 
-func main() {
-	mnemonic := "abandon amount liar amount expire adjust cage candy arch gather drum buyer"
-	seed := Mnemonic2Seed(mnemonic)
-	fmt.Println("mnemonic: ", mnemonic)
-
-	add1, privKey := Bip44Address(seed, 0, 0, 0, 1)
-	fmt.Println("Address1: ", add1)
-
-	Use(privKey)
-}
-
-// func TestSum(t *testing.T) {
-// 	fmt.Println("DONE")
-// }
-//
 //Use - helper to remove warnings
 func Use(vals ...interface{}) {
 	for _, val := range vals {
 		_ = val
 	}
+}
+
+func main() {
+	//see tests (comments denote labels on https://iancoleman.io/bip39/)
+	startingEntropy := Random256Bits()
+	mnemonic := Entropy2Mnemonic(startingEntropy)         //BIP39 Mnemonic
+	seed := Mnemonic2Seed(mnemonic)                       //BIP39 Seed
+	address, privateKey := Bip44Address(seed, 0, 0, 0, 0) //m/44'/0'/0'/0/0
+	xPrivBIP39 := masterKeyFromSeed(seed)                 //BIP32 Root Key
+	keyPairBIP32 := Bip32Extended(seed, 0, 0, 0)          // Generate BIP32 Extended Keypair (xPub/xPriv)
+	exPrivateKeyBIP32 := keyPairBIP32.String()            //BIP32 Extended Private Key
+	exPublicKeyBIP32 := keyPairBIP32.PublicKey().String() //BIP32 Extended Public Key
+
+	addressDerivedUsingxPub := Bip44AddressFromXPub(keyPairBIP32.PublicKey(), 0) //derive 'address' using xPub (no private info)
+
+	wifComp, _ := btcutil.NewWIF(privateKey, &chaincfg.MainNetParams, true) //Generate WIF format Private key
+
+	Use(address, privateKey, exPrivateKeyBIP32, exPublicKeyBIP32, keyPairBIP32, xPrivBIP39, addressDerivedUsingxPub)
+	Use(address, privateKey, wifComp)
 }

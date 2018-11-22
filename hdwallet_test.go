@@ -12,19 +12,18 @@ import (
 // TestBTCVectors - Cycle through the list of test vectors below taken from https://www.coinomi.com/recovery-phrase-tool.html
 // Need to add significantly more vectors for more edge cases, coins, accounts, change etc.
 func TestBTCVectors(t *testing.T) {
-
+	assert.NotEqual(t, Random256Bits(), Random256Bits(), "Random isn't working")
 	for _, testVector := range vectors {
-
 		startingEntropy, _ := hex.DecodeString(testVector.entropy)
 
 		mnemonic := Entropy2Mnemonic(startingEntropy)
-		assert.Equal(t, mnemonic, testVector.mnemonic, "Invalid Seed")
+		assert.Equal(t, mnemonic, testVector.mnemonic, "Mnemonic is incorrect")
 
 		seed := Mnemonic2Seed(mnemonic)
-		assert.Equal(t, hex.EncodeToString(seed), testVector.seed, "Invalid Seed")
+		assert.Equal(t, hex.EncodeToString(seed), testVector.seed, "Seed from Mnemonic is incorrect")
 
 		xpriv := masterKeyFromSeed(seed)
-		assert.Equal(t, xpriv.String(), testVector.bip32Root, "Invalid X Priv")
+		assert.Equal(t, xpriv.String(), testVector.bip32Root, "Invalid xPriv")
 
 		bip32Extended := Bip32Extended(seed, testVector.coin, testVector.account, testVector.change)
 		assert.Equal(t, bip32Extended.String(), testVector.bip32ExPriv, "Invalid BIP32 Priv")
@@ -32,7 +31,6 @@ func TestBTCVectors(t *testing.T) {
 
 		addressDerivedUsingxPub := Bip44AddressFromXPub(bip32Extended.PublicKey(), testVector.addressIndex)
 		assert.Equal(t, addressDerivedUsingxPub, testVector.address, " Incorrect Derviced XPUB address")
-		//fmt.Print("Public Key is ", temp)
 
 		btcAdd, btcPrivKey := Bip44Address(seed, testVector.coin, testVector.account, testVector.change, testVector.addressIndex)
 		assert.Equal(t, btcAdd, testVector.address, "Invalid BTC Address")
