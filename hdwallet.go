@@ -8,6 +8,7 @@ import (
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcutil/hdkeychain"
 )
 
 //BIP 32 - xPub/xPriv from seed
@@ -26,7 +27,7 @@ import (
 //GetBitcoinAddress get Bitcoin (BIP32,39,44) address & associated private key for given seed, account & index
 func Bip44Address(seed []byte, coin int, account int, change int, addressIndex int) (string, *btcec.PrivateKey) {
 	bip32extended := Bip32Extended(seed, coin, account, change)
-	fmt.Println("bip32extended: ", bip32extended.PublicKey())
+	//fmt.Println("bip32extended: ", bip32extended.PublicKey())
 	add1, _ := bip32extended.NewChildKey(uint32(addressIndex))
 	privKey, public := btcec.PrivKeyFromBytes(btcec.S256(), add1.Key)
 	Use(privKey)
@@ -37,6 +38,36 @@ func Bip44Address(seed []byte, coin int, account int, change int, addressIndex i
 func masterKeyFromSeed(seed []byte) *bip32.Key {
 	masterKey, _ := bip32.NewMasterKey(seed)
 	return masterKey
+}
+
+//Bip44AddressFromXPub Generate Bitcoin address from XPub
+func Bip44AddressFromXPub(key *bip32.Key, addressIndex int) string {
+	xpubRaw := "xpub6FPsFsTPcNZW16Cz274HPALS91r8joGLFhQo7M93TPBRUBttb48xBZ9k34oiG29Bvqfry9QyXPsGXSRE1kjut92Dgik1w6Whm1GU4F122n8"
+	offset := 0
+
+	xpubKey, _ := hdkeychain.NewKeyFromString(xpubRaw)
+	keys := make([]*hdkeychain.ExtendedKey, 10)
+	for i := uint32(0); i < uint32(len(keys)); i++ {
+		chPubKey, _ := xpubKey.Child(i + uint32(offset))
+		fmt.Println(chPubKey.Address(&chaincfg.MainNetParams))
+	}
+
+	// return keys
+	//
+	// fmt.Println("XPUB: ", xpubRaw)
+	//
+	// devKey, _ := key.NewChildKey(uint32(addressIndex))
+	// fmt.Println("PUBLIC0:", devKey.PublicKey())
+	// fmt.Println("PUBLIC1:", devKey.String())
+	// fmt.Println("PUBLIC2:", hex.EncodeToString(devKey.ChainCode))
+	// fmt.Println("PUBLIC3:", hex.EncodeToString(devKey.FingerPrint))
+	// fmt.Println("PUBLIC4:", hex.EncodeToString(devKey.Key))
+	// //privKey, public := btcec.PrivKeyFromBytes(btcec.S256(), a.Key)
+	// //Use(privKey)
+	//
+	// //fmt.Println("PRIVATE:", privKey)
+	//caddr, _ := btcutil.NewAddressPubKey(public.SerializeCompressed(), &chaincfg.MainNetParams)
+	return "hello"
 }
 
 //Bip32Extended get Bip32 extended Keys for path
