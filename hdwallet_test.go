@@ -26,7 +26,7 @@ func TestBTCVectors(t *testing.T) {
 		seed := Mnemonic2Seed(mnemonic)
 		assert.Equal(t, hex.EncodeToString(seed), testVector.seed, "Seed from Mnemonic is incorrect")
 
-		xpriv := masterKeyFromSeed(seed)
+		xpriv := MasterKeyFromSeed(seed)
 		assert.Equal(t, xpriv.String(), testVector.bip32Root, "Invalid xPriv")
 
 		bip32Extended := Bip32Extended(seed, testVector.coin, testVector.account, testVector.change)

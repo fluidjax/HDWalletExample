@@ -36,7 +36,7 @@ func Bip44Address(seed []byte, coin int, account int, change int, addressIndex i
 	return caddr.EncodeAddress(), privKey
 }
 
-//masterKeyFromSeed Generate Bitcoin address from XPub
+//MasterKeyFromSeed Generate Bitcoin address from XPub
 func MasterKeyFromSeed(seed []byte) *bip32.Key {
 	masterKey, _ := bip32.NewMasterKey(seed)
 	return masterKey
