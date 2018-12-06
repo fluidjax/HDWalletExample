@@ -5,19 +5,12 @@
 package main
 
 import (
-	"encoding/hex"
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/FactomProject/go-bip32"
 	"github.com/FactomProject/go-bip39"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"github.com/tidwall/gjson"
 )
 
 //BIP 32 - xPub/xPriv from seed
@@ -95,51 +88,6 @@ func Use(vals ...interface{}) {
 	}
 }
 
-func blockCypherHasBeenUsed(address string) bool {
-	url := "https://api.blockcypher.com/v1/btc/main/addrs/" + address
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("The get Balance request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		value := gjson.Get(string(data), "final_n_tx")
-
-		if value.Num > 0 {
-			return true
-		}
-	}
-	return false
-}
-
-func blockCypherGetBalance(address string) (string, error) {
-	url := "https://api.blockcypher.com/v1/btc/main/addrs/" + address + "/balance"
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("The get Balance request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		value := gjson.Get(string(data), "balance")
-		return value.String(), nil
-	}
-	return "0", errors.New("Failed to check Address Balance")
-}
-
-func nextUnusedAddress(seed []byte, startIndex int) string {
-	for i := startIndex; ; i++ {
-		address, _ := Bip44Address(seed, 0, 0, 0, i)
-		used := blockCypherHasBeenUsed(address)
-		if used == false {
-			return address
-		}
-	}
-}
-
 func main() {
-	entropy, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
-	mnemonic := Entropy2Mnemonic(entropy)
-	seed := Mnemonic2Seed(mnemonic)
-
-	nextUnusedAddress := nextUnusedAddress(seed, 0)
-	fmt.Printf("Next Unused Address = %s\n", nextUnusedAddress)
 
 }
