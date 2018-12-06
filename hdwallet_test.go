@@ -15,8 +15,9 @@ import (
 
 // TestBTCVectors - Cycle through the list of test vectors below taken from https://www.coinomi.com/recovery-phrase-tool.html
 // Need to add significantly more vectors for more edge cases, coins, accounts, change etc.
-func TestBTCVectors(t *testing.T) {
+func aTestBTCVectors(t *testing.T) {
 	assert.NotEqual(t, Random256Bits(), Random256Bits(), "Random isn't working")
+
 	for _, testVector := range vectors {
 		startingEntropy, _ := hex.DecodeString(testVector.entropy)
 
@@ -40,6 +41,31 @@ func TestBTCVectors(t *testing.T) {
 		assert.Equal(t, btcAdd, testVector.address, "Invalid BTC Address")
 		wifComp, _ := btcutil.NewWIF(btcPrivKey, &chaincfg.MainNetParams, true)
 		assert.Equal(t, wifComp.String(), testVector.privKey, "Invalid BTC Address")
+	}
+
+}
+
+func TestBench(t *testing.T) {
+	for _, testVector := range vectors {
+		startingEntropy, _ := hex.DecodeString(testVector.entropy)
+		Use(startingEntropy)
+
+		mnemonic := Entropy2Mnemonic(startingEntropy)
+		Use(mnemonic)
+
+		seed := Mnemonic2Seed(mnemonic)
+		Use(seed)
+
+		xpriv := MasterKeyFromSeed(seed)
+
+		bip32Extended := Bip32Extended(seed, testVector.coin, testVector.account, testVector.change)
+
+		addressDerivedUsingxPub := Bip44AddressFromXPub(bip32Extended.PublicKey(), testVector.addressIndex)
+
+		// btcAdd, btcPrivKey := Bip44Address(seed, testVector.coin, testVector.account, testVector.change, testVector.addressIndex)
+		// wifComp, _ := btcutil.NewWIF(btcPrivKey, &chaincfg.MainNetParams, true)
+
+		Use(xpriv, addressDerivedUsingxPub)
 	}
 }
 

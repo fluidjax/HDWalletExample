@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -94,39 +95,14 @@ func Use(vals ...interface{}) {
 	}
 }
 
-//{"status":200,"msg":"success","data":{"address":"1ALfUfD9NL5TKitZVxec9vuzgmndHstxJb","balance":0.00533265}}
-func getBalance(address string) string {
-	response, err := http.Get("https://btc.mousebelt.com/api/v1/balance/" + address)
-	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		//fmt.Println(string(data))
-		value := gjson.Get(string(data), "data.balance")
-		return value.String()
-	}
-	return "0.00000000"
-}
-
-func getWalletAddresses(seed []byte, coin int, account int, change int, addressIndexStart int, addressIndexEnd int) []string {
-	var res []string
-	for add := addressIndexStart; add < addressIndexEnd; add++ {
-		btcAdd, _ := Bip44Address(seed, coin, account, change, add)
-
-		res = append(res, btcAdd)
-	}
-	return res
-}
-
-func hasTransactions(address string) bool {
-	url := "http://btc.mousebelt.com/api/v1/address/txs/" + address
-	print(url)
+func blockCypherHasBeenUsed(address string) bool {
+	url := "https://api.blockcypher.com/v1/btc/main/addrs/" + address
 	response, err := http.Get(url)
 	if err != nil {
-		fmt.Printf("The HTTP request failed with error %s\n", err)
+		fmt.Printf("The get Balance request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		value := gjson.Get(string(data), "data.total")
+		value := gjson.Get(string(data), "final_n_tx")
 
 		if value.Num > 0 {
 			return true
@@ -135,65 +111,35 @@ func hasTransactions(address string) bool {
 	return false
 }
 
+func blockCypherGetBalance(address string) (string, error) {
+	url := "https://api.blockcypher.com/v1/btc/main/addrs/" + address + "/balance"
+	response, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("The get Balance request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		value := gjson.Get(string(data), "balance")
+		return value.String(), nil
+	}
+	return "0", errors.New("Failed to check Address Balance")
+}
+
+func nextUnusedAddress(seed []byte, startIndex int) string {
+	for i := startIndex; ; i++ {
+		address, _ := Bip44Address(seed, 0, 0, 0, i)
+		used := blockCypherHasBeenUsed(address)
+		if used == false {
+			return address
+		}
+	}
+}
+
 func main() {
 	entropy, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 	mnemonic := Entropy2Mnemonic(entropy)
 	seed := Mnemonic2Seed(mnemonic)
-	Use(seed)
 
-	//Setup backend https://github.com/norestlabs/mousexplore-vcoins
-	//No Rest API https://github.com/norestlabs/mousexplore-vcoins/blob/master/Bitcoin/API.md
-	//Endpoints http://mousexplore.mousebelt.com/btc
+	nextUnusedAddress := nextUnusedAddress(seed, 0)
+	fmt.Printf("Next Unused Address = %s\n", nextUnusedAddress)
 
-	//test backend from NoRest
-	//API https://github.com/norestlabs/mousexplore-vcoins/wiki/Bitcoin
-	//Example call http://127.0.0.1:8080/monitor/db
-	//Online call https://btc.mousebelt.com/monitor
-	//test address 1MqBLR1eMhDzZF3mzdjhZk8VrLj7MzrGwb
-
-	// https://btc.mousebelt.com/api/v1/block/552379
-
-	addresses := getWalletAddresses(seed, 0, 0, 0, 0, 9)
-	address0 := addresses[0]
-	address1 := addresses[1]
-
-	fmt.Printf("Get Balance %s = %s \n", address0, getBalance(address0))
-	fmt.Printf("Get Balance %s = %s \n", address1, getBalance(address1))
-
-	fmt.Printf("Has Transactions %s = %t \n", address0, hasTransactions(address0))
-	fmt.Printf("Has Transactions %s = %t \n", address1, hasTransactions(address1))
-
-	//http://btc.mousebelt.com/api/v1/address/txs/1ALfUfD9NL5TKitZVxec9vuzgmndHstxJb?offset=0
-	//https://btc.mousebelt.com/api/v1/balance/1ALfUfD9NL5TKitZVxec9vuzgmndHstxJb
-	//print("Get Balance Bitcoin address")
-
-	//addresses := getWalletAddresses(seed, 0, 0, 0, 0, 9)
-
-	//fmt.Printf("Has transactions %s = %t \n", addresses[0], hasTransactions(addresses[0]))
-
-	// print("Get addresses in wallet")
-	// print("Get Balance of HD Wallet")
-
-	// print("Get next unused deposit address")
-
-	// print("Withdraw Transction")
-	// print("BroadCast Transaction")
-
-	// 	//see tests (comments denote labels on https://iancoleman.io/bip39/)
-	// 	startingEntropy := Random256Bits()
-	// 	mnemonic := Entropy2Mnemonic(startingEntropy)         //BIP39 Mnemonic
-	// 	seed := Mnemonic2Seed(mnemonic)                       //BIP39 Seed
-	// 	address, privateKey := Bip44Address(seed, 0, 0, 0, 0) //m/44'/0'/0'/0/0
-	// 	xPrivBIP39 := MasterKeyFromSeed(seed)                 //BIP32 Root Key
-	// 	keyPairBIP32 := Bip32Extended(seed, 0, 0, 0)          // Generate BIP32 Extended Keypair (xPub/xPriv)
-	// 	exPrivateKeyBIP32 := keyPairBIP32.String()            //BIP32 Extended Private Key
-	// 	exPublicKeyBIP32 := keyPairBIP32.PublicKey().String() //BIP32 Extended Public Key
-
-	// 	addressDerivedUsingxPub := Bip44AddressFromXPub(keyPairBIP32.PublicKey(), 0) //derive 'address' using xPub (no private info)
-
-	// 	wifComp, _ := btcutil.NewWIF(privateKey, &chaincfg.MainNetParams, true) //Generate WIF format Private key
-
-	// 	print("hello")
-	// 	Use(address, privateKey, exPrivateKeyBIP32, exPublicKeyBIP32, keyPairBIP32, xPrivBIP39, addressDerivedUsingxPub)
-	// 	Use(address, privateKey, wifComp)
 }
