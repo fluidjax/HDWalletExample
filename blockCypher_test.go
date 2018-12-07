@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBlockCypherInterface(t *testing.T) {
+func aTestBlockCypherInterface(t *testing.T) {
 
 	testAddress := "13A1W4jLPP75pzvn2qJ5KyyqG3qPSpb9jM"
 	unusedAddress := "161PrtobFv8DWaYLDXChzZg9euXeg7URxd"

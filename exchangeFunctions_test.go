@@ -11,10 +11,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDepositAPI(t *testing.T) {
+func aTestDepositAPI(t *testing.T) {
 	//Gte next unused address for deposit
 
 	entropy, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+
 	mnemonic := Entropy2Mnemonic(entropy)
 	seed := Mnemonic2Seed(mnemonic)
 
@@ -25,13 +26,15 @@ func TestDepositAPI(t *testing.T) {
 func TestGetBalance(t *testing.T) {
 	//get the total balance for all used addresses for a given seed
 
-	entropy, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
+	entropy, _ := hex.DecodeString("c0ed16aaeb28289fbfd1bfaf40166cbf")
 	mnemonic := Entropy2Mnemonic(entropy)
 	seed := Mnemonic2Seed(mnemonic)
-	Use(seed)
+	balance := getWalletBalance(seed)
+	print(balance)
+
 }
 
-func TestWithdrawal(t *testing.T) {
+func aTestWithdrawal(t *testing.T) {
 	//Create a signed Raw Withdrawal Transaction
 
 	entropy, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")

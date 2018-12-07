@@ -13,6 +13,10 @@ import (
 	"github.com/btcsuite/btcutil/hdkeychain"
 )
 
+//Chain - TestNet or Main Chain
+//var Chain = &chaincfg.TestNet3Params
+var Chain = &chaincfg.MainNetParams
+
 //BIP 32 - xPub/xPriv from seed
 //BIP 39 - Mnemonic Wordlist
 //BIP 44 - m / purpose' / coin_type' / account' / change / address_index
@@ -32,7 +36,7 @@ func Bip44Address(seed []byte, coin int, account int, change int, addressIndex i
 	add1, _ := bip32extended.NewChildKey(uint32(addressIndex))
 	privKey, public := btcec.PrivKeyFromBytes(btcec.S256(), add1.Key)
 	Use(privKey)
-	caddr, _ := btcutil.NewAddressPubKey(public.SerializeCompressed(), &chaincfg.MainNetParams)
+	caddr, _ := btcutil.NewAddressPubKey(public.SerializeCompressed(), Chain)
 	return caddr.EncodeAddress(), privKey
 }
 
@@ -47,8 +51,8 @@ func Bip44AddressFromXPub(key *bip32.Key, addressIndex int) string {
 	xpubRaw := key.PublicKey().String()
 	xpubKey, _ := hdkeychain.NewKeyFromString(xpubRaw)
 	chPubKey, _ := xpubKey.Child(uint32(addressIndex))
-	//return chPubKey.Address(&chaincfg.MainNetParams)
-	address, _ := chPubKey.Address(&chaincfg.MainNetParams)
+	//return chPubKey.Address(Chain)
+	address, _ := chPubKey.Address(Chain)
 	return address.String()
 }
 

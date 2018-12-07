@@ -1,0 +1,4 @@
+testnet
+mq1VMMXiZKLdY2WLeaqocJxXijhEFoQu3X
+
+var StartTime = time.Now()
