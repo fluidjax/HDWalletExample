@@ -1,4 +1,21 @@
-testnet
-mq1VMMXiZKLdY2WLeaqocJxXijhEFoQu3X
+TODO:
 
-var StartTime = time.Now()
+
+Testnet
+Pull entire HD Wallet (TX, add, balances, mempool status) in as single REST request
+Withdraw request
+ 
+
+
+
+Show UTXO's
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet listunspent
+
+
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet validateaddress n1WtM4bCm9BUmhnmBJMLEDnESoRmFXvNm
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getwalletinfo
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getbalance "*" 1 true
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getbalancehistory
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getblockcount
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet listtransactions
+bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getreceivedbyaddress  mkwAzSLfv6ttRqcHmM8UmFjYJEc1wLkxUH
