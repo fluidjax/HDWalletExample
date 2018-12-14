@@ -19,3 +19,16 @@ bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getbalancehistory
 bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getblockcount
 bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet listtransactions
 bitcoin-cli -rpcuser=chris -rpcpassword=ploppy -testnet getreceivedbyaddress  mkwAzSLfv6ttRqcHmM8UmFjYJEc1wLkxUH
+
+
+problems With NoRest
+    13A1W4jLPP75pzvn2qJ5KyyqG3qPSpb9jM
+    
+    
+    98120f3d9834dc61839339123001717218428397ea8ab48412e53aa2bb8fbd64
+    
+    
+    The illustrates the issue with NoRest - same addresses in 2 different explorers, blockchain.com shows a transaction (in 2017), NoRest labs in error  doesn’t.
+https://www.blockchain.com/btc/address/13A1W4jLPP75pzvn2qJ5KyyqG3qPSpb9jM
+https://mousexplore.mousebelt.com/btc/address/13A1W4jLPP75pzvn2qJ5KyyqG3qPSpb9jM
+@Brian Do you have a contact at NoRest labs I can approach about this,  it may be something easily fixable, especially as possibly the source of the error goes back to a transaction in block 100
