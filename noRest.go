@@ -11,12 +11,37 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/qredo/HDWallet/NoRestDataStructures"
 	"github.com/tidwall/gjson"
 )
 
 //var urlStub = "http://127.0.0.1:8080/api/v1/"
 var urlStub = "http://btc.mousebelt.com/api/v1/"
+var myClient = &http.Client{Timeout: 10 * time.Second}
+
+//var urlStub = "http://ec2-18-130-163-254.eu-west-2.compute.amazonaws.com:8080/api/v1/"
+
+func noRestBuildWallet(seed []byte) {
+	for i := 0; i < 1; i++ {
+		address, _ := Bip44Address(seed, 0, 0, 0, i)
+		noRestGetTransactions(address)
+		//Use(tx)
+	}
+}
+
+func noRestGetTransactions(address string) {
+	//url := "http://btc.mousebelt.com/api/v1/balance/12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"
+	url := "http://btc.mousebelt.com/api/v1/address/txs/12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"
+
+	res, _ := http.Get(url)
+	data, _ := ioutil.ReadAll(res.Body)
+
+	trans, err := NoRestDataStructures.UnmarshalTransactions(data)
+	print(trans.Data.Total)
+	Use(err)
+}
 
 func noRestAddressHasBeenUsed(address string) bool {
 	url := urlStub + "address/txs/" + address
