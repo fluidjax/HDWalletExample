@@ -31,16 +31,12 @@ func noRestBuildWallet(seed []byte) {
 	}
 }
 
-func noRestGetTransactions(address string) {
-	//url := "http://btc.mousebelt.com/api/v1/balance/12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"
-	url := "http://btc.mousebelt.com/api/v1/address/txs/12c6DSiU4Rq3P4ZxziKxzrL5LmMBrzjrJX"
-
+func noRestGetTransactions(address string) NoRestDataStructures.Transactions {
+	url := "http://btc.mousebelt.com/api/v1/address/txs/" + address
 	res, _ := http.Get(url)
 	data, _ := ioutil.ReadAll(res.Body)
-
-	trans, err := NoRestDataStructures.UnmarshalTransactions(data)
-	print(trans.Data.Total)
-	Use(err)
+	trans, _ := NoRestDataStructures.UnmarshalTransactions(data)
+	return trans
 }
 
 func noRestAddressHasBeenUsed(address string) bool {
